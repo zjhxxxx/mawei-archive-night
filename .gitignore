@@ -1,0 +1,9 @@
+__*.png
+__*.jpg
+__*.jpeg
+__*.webp
+tmp/
+*.log
+*.tmp
+Thumbs.db
+.DS_Store

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>船政遗响：夜访马尾</title>
+  <meta
+    name="description"
+    content="以马尾船政文化为主题的轻探索网页作品。玩家在五个地点之间切换镜头、打开柜门与内景，逐步归档十五份线索，完成属于自己的船政之夜。"
+  >
+  <link rel="stylesheet" href="./styles.css?v=20260413-ui5">
+</head>
+<body>
+  <div class="boot-screen" id="boot-screen">
+    <div class="boot-screen__backdrop" aria-hidden="true"></div>
+    <div class="boot-screen__card">
+      <p class="boot-screen__eyebrow">MAWEI SHIPYARD CULTURE · INTERACTIVE WORK</p>
+      <h1>船政遗响<br>夜访马尾</h1>
+      <p class="boot-screen__summary">
+        从总理船政衙门出发，穿过学堂、船坞、罗星塔与归档室。
+        你将用一夜的点击与归档，重新理解船政如何把制度、知识、制造与向海视野连成一体。
+      </p>
+      <div class="boot-screen__actions">
+        <button class="button button--primary" id="start-game" type="button" onclick="window.__maweiBootFallback('play')">开始夜访</button>
+        <button class="button button--ghost" id="continue-game" type="button" onclick="window.__maweiBootFallback('resume')" hidden>继续上次探索</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar__brand">
+        <div class="brand-mark">船政</div>
+        <div>
+          <p class="topbar__eyebrow">马尾船政文化轻探索作品</p>
+          <h1>船政遗响</h1>
+        </div>
+      </div>
+
+      <div class="topbar__status">
+        <div class="status-pill">
+          <span>档案</span>
+          <strong id="archive-count">0 / 15</strong>
+        </div>
+        <div class="status-pill">
+          <span>解锁</span>
+          <strong id="unlock-count">1 / 5</strong>
+        </div>
+      </div>
+
+      <div class="topbar__actions">
+        <button class="button button--ghost" id="map-button" type="button">航图</button>
+        <button class="button button--ghost" id="archive-button" type="button">档案柜</button>
+        <button class="button button--ghost" id="reset-button" type="button">重开</button>
+      </div>
+    </header>
+
+    <main class="game-main">
+      <section class="stage-panel">
+        <div class="scene-stage" id="scene-stage" data-scene="yamen">
+          <div class="scene-stage__hud">
+            <div class="scene-stage__trail">
+              <button class="trail-back" id="view-back" type="button" hidden>返回上景</button>
+              <span id="stage-path">衙门 / 门外</span>
+            </div>
+            <span class="scene-stage__progress" id="stage-progress">当前地点 0 / 3</span>
+          </div>
+
+          <div class="scene-stage__frame">
+            <div class="scene-stage__ambient" aria-hidden="true"></div>
+            <div class="scene-stage__artwork" id="scene-artwork" aria-hidden="true"></div>
+            <div class="scene-stage__wash" aria-hidden="true"></div>
+            <div class="scene-actions" id="scene-actions"></div>
+          </div>
+
+          <div class="scene-stage__caption">
+            <p class="scene-stage__kicker" id="scene-kicker">起点</p>
+            <h2 id="scene-title">总理船政衙门</h2>
+            <p class="scene-stage__summary" id="scene-summary">
+              从门外看去，船政不是一处旧迹，而是一整套被组织起来的现实工程。
+            </p>
+            <p class="scene-stage__objective" id="scene-objective">
+              先选一个入口进入内景，再把真正的档案收入柜中。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="console-panel">
+        <div class="console-tabs" role="tablist" aria-label="场景信息切换">
+          <button class="console-tabs__button is-active" data-panel-tab="story" type="button">引导</button>
+          <button class="console-tabs__button" data-panel-tab="checklist" type="button">调查</button>
+          <button class="console-tabs__button" data-panel-tab="choices" type="button">归档</button>
+        </div>
+
+        <section class="panel console-view is-active" data-panel-view="story">
+          <p class="panel__kicker" id="story-speaker">引导</p>
+          <h2 class="panel__title" id="story-title">从门外进入船政系统</h2>
+          <p class="panel__text" id="story-text">
+            先从场景里的入口动作开始。进门、开柜、靠近桌案之后，真正的档案才会在内景里出现。
+          </p>
+
+          <div class="mission-card">
+            <p class="panel__kicker">当前目标</p>
+            <h3 id="mission-title">先从衙门的三条线索开始</h3>
+            <p id="mission-text">理解船政如何把制度、调度与方向组织成一个真正能运行的系统。</p>
+          </div>
+        </section>
+
+        <section class="panel console-view" data-panel-view="checklist">
+          <p class="panel__kicker">地点调查</p>
+          <ul class="checklist" id="scene-checklist"></ul>
+
+          <div class="scoreboard">
+            <div class="scoreboard__item">
+              <span>匠作</span>
+              <div class="scorebar"><span id="score-craft"></span></div>
+            </div>
+            <div class="scoreboard__item">
+              <span>新学</span>
+              <div class="scorebar"><span id="score-study"></span></div>
+            </div>
+            <div class="scoreboard__item">
+              <span>向海</span>
+              <div class="scorebar"><span id="score-voyage"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel console-view" data-panel-view="choices">
+          <p class="panel__kicker" id="choice-kicker">归档判断</p>
+          <p class="choice-hint" id="choice-hint">先收齐当前地点的三份档案，再完成归档判断。</p>
+          <div class="choice-list" id="choice-list"></div>
+        </section>
+
+        <section class="panel console-view console-view--archive-dialog" data-panel-view="archive-dialog">
+          <div class="archive-dialog">
+            <div class="archive-dialog__header">
+              <div>
+                <p class="panel__kicker" id="archive-dialog-scene">归档提示</p>
+                <h2 class="archive-dialog__title" id="archive-dialog-title">档案已入柜</h2>
+              </div>
+              <span class="archive-dialog__progress" id="archive-dialog-progress">当前地点 0 / 3</span>
+            </div>
+
+            <div class="archive-dialog__body">
+              <div class="archive-dialog__art" id="archive-dialog-art" aria-hidden="true"></div>
+              <div class="archive-dialog__copy">
+                <p class="archive-dialog__tag" id="archive-dialog-tag">类别</p>
+                <p class="archive-dialog__text" id="archive-dialog-text">这份线索已经完成归档，你可以继续夜访，或立刻打开档案柜查看它的位置。</p>
+                <p class="archive-dialog__hint" id="archive-dialog-hint">继续向前，或打开档案柜查看已经归位的线索。</p>
+              </div>
+            </div>
+
+            <div class="archive-dialog__actions">
+              <button class="button button--ghost" id="archive-dialog-continue" type="button">继续夜访</button>
+              <button class="button button--primary" id="archive-dialog-open" type="button">查看档案柜</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <aside class="map-drawer" id="map-drawer" aria-hidden="true">
+    <div class="map-drawer__scrim" id="map-close"></div>
+    <div class="map-drawer__panel">
+      <div class="drawer-header">
+        <div>
+          <p class="panel__kicker">探索航图</p>
+          <h2>马尾场景总图</h2>
+        </div>
+        <button class="button button--ghost" id="map-close-button" type="button">关闭</button>
+      </div>
+
+      <div class="map-board">
+        <div class="map-board__waterway" aria-hidden="true"></div>
+        <div class="map-board__shoreline" aria-hidden="true"></div>
+        <svg class="map-board__routes" viewBox="0 0 320 520" aria-hidden="true">
+          <path data-route="yamen-academy" d="M58 385 C84 342, 108 296, 134 239"></path>
+          <path data-route="academy-tower" d="M134 239 C164 198, 208 156, 262 125"></path>
+          <path data-route="academy-dock" d="M134 239 C162 284, 188 320, 221 348"></path>
+          <path data-route="dock-archive" d="M221 348 C236 372, 246 402, 256 437"></path>
+        </svg>
+
+        <button class="map-node" data-scene-target="yamen" type="button" style="left: 18%; top: 74%;">
+          <span class="map-node__pin"></span>
+          <span class="map-node__body">
+            <span class="map-node__name">衙门</span>
+            <span class="map-node__meta"><span class="map-node__state">起点</span><span class="map-node__count">0 / 3</span></span>
+          </span>
+        </button>
+
+        <button class="map-node" data-scene-target="academy" type="button" style="left: 42%; top: 46%;">
+          <span class="map-node__pin"></span>
+          <span class="map-node__body">
+            <span class="map-node__name">学堂</span>
+            <span class="map-node__meta"><span class="map-node__state">未解锁</span><span class="map-node__count">0 / 3</span></span>
+          </span>
+        </button>
+
+        <button class="map-node" data-scene-target="dock" type="button" style="left: 69%; top: 67%;">
+          <span class="map-node__pin"></span>
+          <span class="map-node__body">
+            <span class="map-node__name">船坞</span>
+            <span class="map-node__meta"><span class="map-node__state">未解锁</span><span class="map-node__count">0 / 3</span></span>
+          </span>
+        </button>
+
+        <button class="map-node" data-scene-target="tower" type="button" style="left: 82%; top: 24%;">
+          <span class="map-node__pin"></span>
+          <span class="map-node__body">
+            <span class="map-node__name">罗星塔</span>
+            <span class="map-node__meta"><span class="map-node__state">未解锁</span><span class="map-node__count">0 / 3</span></span>
+          </span>
+        </button>
+
+        <button class="map-node" data-scene-target="archive" type="button" style="left: 80%; top: 84%;">
+          <span class="map-node__pin"></span>
+          <span class="map-node__body">
+            <span class="map-node__name">归档室</span>
+            <span class="map-node__meta"><span class="map-node__state">未解锁</span><span class="map-node__count">0 / 3</span></span>
+          </span>
+        </button>
+
+        <div class="map-board__legend" aria-hidden="true">
+          <span>闽江口</span>
+          <span>船政旧址带</span>
+        </div>
+        <div class="map-board__compass" aria-hidden="true"></div>
+        <div class="map-board__grain" aria-hidden="true"></div>
+      </div>
+    </div>
+  </aside>
+
+  <aside class="archive-drawer" id="archive-drawer" aria-hidden="true">
+    <div class="archive-drawer__scrim" id="archive-close"></div>
+    <div class="archive-drawer__panel">
+      <div class="drawer-header">
+        <div>
+          <p class="panel__kicker">船政档案柜</p>
+          <h2>十五份归档线索</h2>
+        </div>
+        <button class="button button--ghost" id="archive-close-button" type="button">关闭</button>
+      </div>
+
+      <div class="archive-drawer__body">
+        <div class="archive-grid" id="archive-grid"></div>
+
+        <div class="archive-detail">
+          <p class="archive-detail__scene" id="archive-detail-scene">等待选取</p>
+          <div class="archive-detail__art" id="archive-detail-art" aria-hidden="true"></div>
+          <h3 id="archive-detail-title">尚未展开档案</h3>
+          <p id="archive-detail-text">点击已经归档的卡片，查看这份线索在船政文化中的位置。</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="relic-modal" id="relic-modal" hidden>
+    <div class="relic-modal__scrim" id="relic-close"></div>
+    <div class="relic-modal__card">
+      <p class="panel__kicker" id="relic-scene">线索揭示</p>
+      <div class="relic-modal__plate" id="relic-plate" aria-hidden="true"></div>
+      <h2 id="relic-title">档案标题</h2>
+      <p class="relic-modal__tag" id="relic-tag">类别</p>
+      <p class="relic-modal__text" id="relic-text">档案说明</p>
+      <div class="relic-modal__footer">
+        <span class="relic-modal__progress" id="relic-progress">当前地点 0 / 3</span>
+        <div class="relic-modal__actions">
+          <button class="button button--ghost" id="relic-cancel" type="button">返回场景</button>
+          <button class="button button--primary" id="relic-confirm" type="button">收入档案柜</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ending-screen" id="ending-screen" hidden>
+    <div class="ending-screen__backdrop"></div>
+    <div class="ending-screen__card">
+      <p class="panel__kicker">归档完成</p>
+      <h2 id="ending-title">你的船政印记</h2>
+      <p id="ending-text">结局文案将出现在这里。</p>
+      <div class="ending-screen__stats">
+        <span id="ending-archives">档案 0 / 15</span>
+        <span id="ending-themes">倾向待判定</span>
+      </div>
+      <p class="ending-screen__bonus" id="ending-bonus" hidden></p>
+      <div class="ending-screen__actions">
+        <button class="button button--primary" id="ending-restart" type="button">重新夜访</button>
+        <button class="button button--ghost" id="ending-close" type="button">继续查看档案</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    window.__maweiBootFallback = function (mode) {
+      var url = new URL(window.location.href);
+      url.searchParams.delete("play");
+      url.searchParams.delete("resume");
+      url.searchParams.set(mode === "resume" ? "resume" : "play", "1");
+      url.searchParams.set("v", "20260413-ui5");
+      window.location.href = url.toString();
+    };
+  </script>
+  <script src="./script.js?v=20260413-ui5"></script>
+</body>
+</html>
