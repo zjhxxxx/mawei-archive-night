@@ -7,3 +7,6 @@ tmp/
 *.tmp
 Thumbs.db
 .DS_Store
+.vscode/
+__trustedhosts_result.txt
+word_save_test.docx
